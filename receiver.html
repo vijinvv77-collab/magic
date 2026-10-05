@@ -19,6 +19,9 @@
 
     <h2 id="status" style="margin-top: 40px; color: #ffc107;">STATUS: STOPPED</h2>
 
+    <!-- Background Wake Audio -->
+    <audio id="silentAudio" loop src="https://raw.githubusercontent.com/anars/blank-audio/master/10-seconds-of-silence.mp3"></audio>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCGy1QcZfvh4SoEdcVcSGl-_jdSCagH4sE",
@@ -37,6 +40,10 @@
         }
 
         function startReceiver() {
+            // ബാക്ക്ഗ്രൗണ്ടിൽ ബ്രൗസർ ഉറങ്ങിപ്പോകാതിരിക്കാൻ സൈലന്റ് ഓഡിയോ പ്ലേ ചെയ്യുന്നു
+            const audio = document.getElementById('silentAudio');
+            audio.play().catch(e => console.log("Audio play error:", e));
+
             if ("vibrate" in navigator) {
                 navigator.vibrate([200, 100, 200]);
             }
@@ -61,11 +68,11 @@
                 if (code >= 1 && code <= 26) {
                     for (let i = 0; i < code; i++) {
                         if ("vibrate" in navigator) {
-                            navigator.vibrate(300); // 300ms ടാപ്പ്
+                            navigator.vibrate(300);
                         }
-                        await delay(500); // ടാപ്പുകൾക്കിടയിലെ ഗ്യാപ്പ്
+                        await delay(500);
                     }
-                    await delay(2000); // അക്ഷരങ്ങൾക്കിടയിലെ 2 സെക്കൻഡ് പോസ്
+                    await delay(2000);
                 }
             }
         }
