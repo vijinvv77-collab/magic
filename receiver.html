@@ -9,9 +9,9 @@
 </head>
 <body style="background: black; color: white; font-family: sans-serif; text-align: center; padding-top: 50px;">
     <h2>Magic Receiver</h2>
-    <p>ഫോണിൽ വൈബ്രേഷൻ ഓൺ ചെയ്യാൻ താഴെയുള്ള ബട്ടൺ അമർത്തുക:</p>
+    <p>വൈബ്രേഷൻ ആക്റ്റീവ് ആക്കാൻ താഴെയുള്ള ബട്ടൺ അമർത്തുക:</p>
     
-    <button id="startBtn" onclick="enableVibration()" style="padding: 15px 30px; font-size: 18px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer;">
+    <button id="startBtn" onclick="enableVibration()" style="padding: 18px 36px; font-size: 20px; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">
         Start Listening
     </button>
 
@@ -31,33 +31,44 @@
         const database = firebase.database();
 
         function enableVibration() {
-            // ടെസ്റ്റിനായി ചെറിയൊരു വൈബ്രേഷൻ
-            navigator.vibrate(200);
+            // ബട്ടൺ അമർത്തുമ്പോൾ ചെറുതായി രണ്ട് തവണ വൈബ്രേറ്റ് ചെയ്യും
+            if ("vibrate" in navigator) {
+                navigator.vibrate([150, 100, 150]);
+            }
             
             document.getElementById('startBtn').style.display = 'none';
             document.getElementById('status').innerText = "Ready & Listening...";
             document.getElementById('status').style.color = "#28a745";
 
-            // Firebase ലിസണർ സ്റ്റാർട്ട് ചെയ്യുന്നു
+            // Firebase-ൽ നിന്ന് ഡാറ്റ വരുമ്പോൾ
             database.ref('magic/thought').on('value', (snapshot) => {
                 const word = snapshot.val();
                 if (word) {
                     document.getElementById('status').innerText = "Received: " + word;
-                    vibrateWordSlowly(word.toUpperCase());
+                    generateVibrationPattern(word.toUpperCase());
                 }
             });
         }
 
-        async function vibrateWordSlowly(word) {
+        function generateVibrationPattern(word) {
+            let pattern = [];
+
             for (let char of word) {
                 let code = char.charCodeAt(0) - 64; // A=1, B=2, C=3...
                 if (code >= 1 && code <= 26) {
                     for (let i = 0; i < code; i++) {
-                        navigator.vibrate(300);
-                        await new Promise(r => setTimeout(r, 400));
+                        pattern.push(300); // 300ms വൈബ്രേഷൻ
+                        pattern.push(300); // വൈബ്രേഷനുകൾക്കിടയിലുള്ള 300ms ഗ്യാപ്പ്
                     }
-                    await new Promise(r => setTimeout(r, 2000));
+                    // ഒരു അക്ഷരം കഴിഞ്ഞാൽ അടുത്ത അക്ഷരത്തിനായി 2000ms (2 സെക്കൻഡ്) ഗ്യാപ്പ്
+                    pattern.push(2000); 
                 }
+            }
+
+            if ("vibrate" in navigator && pattern.length > 0) {
+                // മുൻപുള്ള വൈബ്രേഷൻ കാൻസൽ ചെയ്ത് പുതിയ പാറ്റേൺ പ്രവർത്തിപ്പിക്കുന്നു
+                navigator.vibrate(0);
+                navigator.vibrate(pattern);
             }
         }
     </script>
