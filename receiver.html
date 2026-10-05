@@ -6,16 +6,18 @@
     <title>Magic Receiver</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: monospace; text-align: center; padding-top: 50px; }
+        button { padding: 20px 40px; font-size: 22px; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+    </style>
 </head>
-<body style="background: black; color: white; font-family: sans-serif; text-align: center; padding-top: 50px;">
+<body>
     <h2>Magic Receiver</h2>
-    <p>വൈബ്രേഷൻ ആക്റ്റീവ് ആക്കാൻ താഴെയുള്ള ബട്ടൺ അമർത്തുക:</p>
+    <p>സ്റ്റാർട്ട് ചെയ്യാൻ ബട്ടൺ അമർത്തുക:</p>
     
-    <button id="startBtn" onclick="enableVibration()" style="padding: 18px 36px; font-size: 20px; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">
-        Start Listening
-    </button>
+    <button id="startBtn" onclick="startReceiver()">START LISTENING</button>
 
-    <h3 id="status" style="margin-top: 30px; color: #ffc107;">Stopped</h3>
+    <h2 id="status" style="margin-top: 40px; color: #ffc107;">STATUS: STOPPED</h2>
 
     <script>
         const firebaseConfig = {
@@ -30,43 +32,43 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        function enableVibration() {
-            // ബട്ടൺ അമർത്തുമ്പോൾ ഡബിൾ ടാപ്പ് വൈബ്രേഷൻ
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function startReceiver() {
+            // ടെസ്റ്റ് വൈബ്രേഷൻ (മനസ്സിലാക്കാൻ)
             if ("vibrate" in navigator) {
                 navigator.vibrate([200, 100, 200]);
             }
             
             document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('status').innerText = "Ready & Listening...";
+            document.getElementById('status').innerText = "STATUS: READY & LISTENING";
             document.getElementById('status').style.color = "#28a745";
 
-            // Firebase ലിസണർ
-            database.ref('magic/thought').on('value', (snapshot) => {
-                const word = snapshot.val();
-                if (word && word.trim() !== "") {
-                    document.getElementById('status').innerText = "Received: " + word;
-                    generateVibrationPattern(word.trim().toUpperCase());
+            // ഡാറ്റ വരുമ്പോൾ
+            database.ref('magic/thought').on('value', async (snapshot) => {
+                const rawData = snapshot.val();
+                if (rawData) {
+                    const word = rawData.split('_')[0]; // ടൈംസ്റ്റാമ്പ് മാറ്റുന്നു
+                    document.getElementById('status').innerText = "RECEIVED: " + word;
+                    await vibrateWord(word);
                 }
             });
         }
 
-        function generateVibrationPattern(word) {
-            let pattern = [];
-
+        async function vibrateWord(word) {
             for (let char of word) {
                 let code = char.charCodeAt(0) - 64; // A=1, B=2, C=3...
                 if (code >= 1 && code <= 26) {
                     for (let i = 0; i < code; i++) {
-                        pattern.push(300); // 300ms വൈബ്രേഷൻ
-                        pattern.push(300); // 300ms ഗ്യാപ്പ്
+                        if ("vibrate" in navigator) {
+                            navigator.vibrate(300); // 300ms വൈബ്രേഷൻ
+                        }
+                        await delay(500); // ഓരോ വൈബ്രേഷനും ഇടയിൽ 0.5 സെക്കൻഡ് ഗ്യാപ്പ്
                     }
-                    pattern.push(2000); // അടുത്ത അക്ഷരത്തിന് 2 സെക്കൻഡ് ഗ്യാപ്പ്
+                    await delay(2000); // ഓരോ അക്ഷരവും കഴിഞ്ഞാൽ 2 സെക്കൻഡ് ഗ്യാപ്പ്
                 }
-            }
-
-            if ("vibrate" in navigator && pattern.length > 0) {
-                navigator.vibrate(0);
-                navigator.vibrate(pattern);
             }
         }
     </script>
