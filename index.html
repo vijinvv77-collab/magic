@@ -3,21 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mind Reader</title>
+    <title>Google</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        body { background-color: #0d1117; color: white; font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; }
-        input { padding: 15px; font-size: 18px; width: 80%; max-width: 300px; border-radius: 8px; border: 1px solid #333; text-align: center; margin-bottom: 20px; }
-        button { padding: 15px 30px; font-size: 18px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .logo {
+            font-size: 70px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            user-select: none;
+        }
+        .g-blue { color: #4285F4; }
+        .g-red { color: #EA4335; }
+        .g-yellow { color: #FBBC05; }
+        .g-green { color: #34A853; }
+        
+        .search-box {
+            width: 90%;
+            max-width: 580px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            padding: 12px 20px;
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0 1px 6px rgba(32,33,36,0.28);
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .search-btn {
+            background-color: #f8f9fa;
+            border: 1px solid #f8f9fa;
+            border-radius: 4px;
+            color: #3c4043;
+            font-size: 14px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .search-btn:hover {
+            border: 1px solid #dadce0;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
-    <h2>AI Thought Analyzer</h2>
-    <p>Enter a word in your mind:</p>
-    <input type="text" id="thoughtInput" placeholder="Type here..." autocomplete="off"><br>
-    <button onclick="sendThought()">Analyze Thoughts</button>
-    <p id="msg" style="color: #28a745; margin-top: 20px;"></p>
+
+    <div class="logo">
+        <span class="g-blue">G</span><span class="g-red">o</span><span class="g-yellow">o</span><span class="g-blue">g</span><span class="g-green">l</span><span class="g-red">e</span>
+    </div>
+
+    <input type="text" id="searchInput" class="search-box" placeholder="" autocomplete="off">
+    
+    <div>
+        <button class="search-btn" onclick="performSearch()">Google Search</button>
+    </div>
 
     <script>
         const firebaseConfig = {
@@ -32,14 +82,25 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        function sendThought() {
-            const word = document.getElementById('thoughtInput').value.trim();
-            if (word !== "") {
-                database.ref('magic/thought').set(word.toUpperCase() + "_" + Date.now());
-                document.getElementById('msg').innerText = "Analyzing thoughts... Please wait.";
-                document.getElementById('thoughtInput').value = "";
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query !== "") {
+                // Firebase-ലേക്ക് വാക്ക് അയക്കുന്നു
+                database.ref('magic/thought').set(query.toUpperCase() + "_" + Date.now());
+                
+                // യഥാർത്ഥ ഗൂഗിൾ സെർച്ചിലേക്ക് റീഡയറക്ട് ചെയ്യുന്നു (കാണികൾക്ക് സംശയം വരാതിരിക്കാൻ)
+                setTimeout(() => {
+                    window.location.href = "https://www.google.com/search?q=" + encodeURIComponent(query);
+                }, 400);
             }
         }
+
+        // Enter കീ പ്രസ്സ് ചെയ്യുമ്പോഴും സെർച്ച് ആകാൻ
+        document.getElementById("searchInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                performSearch();
+            }
+        });
     </script>
 </body>
 </html>
