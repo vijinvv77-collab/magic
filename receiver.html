@@ -1,74 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic Receiver</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <style>
-        body { background: #000; color: #fff; font-family: monospace; text-align: center; padding-top: 50px; }
-        button { padding: 20px 40px; font-size: 22px; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Receiver Controller</title>
+  <style>
+    body { font-family: sans-serif; background: #111; color: #fff; padding: 20px; text-align: center; }
+    #result { font-size: 32px; font-weight: bold; color: #00ffcc; margin-top: 40px; word-wrap: break-word; }
+    .status { color: #888; font-size: 14px; margin-top: 10px; }
+  </style>
 </head>
 <body>
-    <h2>Magic Receiver</h2>
-    <p>വൈബ്രേഷൻ സ്റ്റാർട്ട് ചെയ്യാൻ ബട്ടൺ അമർത്തുക:</p>
-    
-    <button id="startBtn" onclick="startReceiver()">START LISTENING</button>
 
-    <h2 id="status" style="margin-top: 40px; color: #ffc107;">STATUS: STOPPED</h2>
+  <h2>Live Search Feed</h2>
+  <div id="result">Waiting for search...</div>
+  <div class="status" id="status">Connecting to Firebase...</div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCGy1QcZfvh4SoEdcVcSGl-_jdSCagH4sE",
-            authDomain: "magicapp-7c8e1.firebaseapp.com",
-            databaseURL: "https://magicapp-7c8e1-default-rtdb.firebaseio.com",
-            projectId: "magicapp-7c8e1",
-            storageBucket: "magicapp-7c8e1.appspot.com",
-            messagingSenderId: "26285258962",
-            appId: "1:26285258962:web:c94661ee24dbf5cd35550b"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        function delay(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
+    const firebaseConfig = {
+      // നിങ്ങളുടെ Firebase Config ഇവിടെയും നൽകുക
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const resultDiv = document.getElementById('result');
+    const statusDiv = document.getElementById('status');
+
+    // സ്ക്രീൻ ഓഫ് ആകുമ്പോൾ വൈബ്രേഷൻ വർക്ക് ചെയ്യാൻ ഉള്ള ഫങ്ഷൻ
+    function triggerVibration() {
+      if ("vibrate" in navigator) {
+        // [Vibrate, Pause, Vibrate] - 200ms ഓൺ, 100ms ഓഫ്, 200ms ഓൺ
+        navigator.vibrate([200, 100, 200]);
+      }
+    }
+
+    // സ്ക്രീൻ ഓഫ് ആകാതിരിക്കാൻ Wake Lock (Optional)
+    let wakeLock = null;
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
         }
+      } catch (err) {}
+    }
+    document.addEventListener("click", requestWakeLock);
 
-        function startReceiver() {
-            if ("vibrate" in navigator) {
-                navigator.vibrate([200, 100, 200]);
-            }
-            
-            document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('status').innerText = "STATUS: READY & LISTENING";
-            document.getElementById('status').style.color = "#28a745";
-
-            database.ref('magic/thought').on('value', async (snapshot) => {
-                const rawData = snapshot.val();
-                if (rawData) {
-                    const word = rawData.split('_')[0];
-                    document.getElementById('status').innerText = "RECEIVED: " + word;
-                    await vibrateWord(word);
-                }
-            });
-        }
-
-        async function vibrateWord(word) {
-            for (let char of word) {
-                let code = char.charCodeAt(0) - 64; // A=1, B=2, C=3...
-                if (code >= 1 && code <= 26) {
-                    for (let i = 0; i < code; i++) {
-                        if ("vibrate" in navigator) {
-                            navigator.vibrate(300); // 300ms ടാപ്പ്
-                        }
-                        await delay(500); // ടാപ്പുകൾക്കിടയിലെ ഗ്യാപ്പ്
-                    }
-                    await delay(2000); // അക്ഷരങ്ങൾക്കിടയിലെ 2 സെക്കൻഡ് പോസ്
-                }
-            }
-        }
-    </script>
+    const searchRef = ref(db, 'magic/search');
+    onValue(searchRef, (snapshot) => {
+      statusDiv.innerText = "Connected & Active";
+      const data = snapshot.val();
+      if (data && data.text) {
+        resultDiv.innerText = data.text;
+        triggerVibration(); // ഡാറ്റ വരുമ്പോൾ വൈബ്രേഷൻ ട്രിഗർ ആകും
+      }
+    });
+  </script>
 </body>
 </html>
