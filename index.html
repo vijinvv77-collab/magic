@@ -1,50 +1,44 @@
 <!DOCTYPE html>
-<html lang="ml">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Telepathy Engine</title>
-    <style>
-        body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 40px 20px; }
-        .card { background: #1e293b; border-radius: 12px; padding: 25px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h2 { color: #38bdf8; margin-bottom: 10px; }
-        input { width: 90%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 16px; margin: 15px 0; outline: none; }
-        button { background: #0284c7; color: white; border: none; padding: 12px 25px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        #status { margin-top: 15px; color: #a855f7; font-weight: bold; }
-    </style>
+    <title>Mind Reader</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        body { background-color: #0d1117; color: white; font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; }
+        input { padding: 15px; font-size: 18px; width: 80%; max-width: 300px; border-radius: 8px; border: 1px solid #333; text-align: center; margin-bottom: 20px; }
+        button { padding: 15px 30px; font-size: 18px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    </style>
 </head>
 <body>
-
-    <div class="card">
-        <h2>AI Telepathy Engine</h2>
-        <p>നിങ്ങളുടെ മനസ്സിൽ വിചാരിച്ച പേര് ടൈപ്പ് ചെയ്യുക. AI നിങ്ങളുടെ ചിന്തകൾ വായിക്കും!</p>
-        <input type="text" id="secretName" placeholder="Enter name here..." autocomplete="off">
-        <button onclick="sendName()">Analyze Thoughts</button>
-        <div id="status"></div>
-    </div>
+    <h2>AI Thought Analyzer</h2>
+    <p>Enter a word in your mind:</p>
+    <input type="text" id="thoughtInput" placeholder="Type here..." autocomplete="off"><br>
+    <button onclick="sendThought()">Analyze Thoughts</button>
+    <p id="msg" style="color: #28a745; margin-top: 20px;"></p>
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyCgY1QcZfvh4SoEdcVcSGl-_jdSCagH4sE",
+            apiKey: "AIzaSyCGy1QcZfvh4SoEdcVcSGl-_jdSCagH4sE",
             authDomain: "magicapp-7c8e1.firebaseapp.com",
             databaseURL: "https://magicapp-7c8e1-default-rtdb.firebaseio.com",
             projectId: "magicapp-7c8e1",
-            storageBucket: "magicapp-7c8e1.firebasestorage.app",
+            storageBucket: "magicapp-7c8e1.appspot.com",
             messagingSenderId: "26285258962",
             appId: "1:26285258962:web:c94661ee24dbf5cd35550b"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        const database = firebase.database();
 
-        function sendName() {
-            const name = document.getElementById('secretName').value.trim().toUpperCase();
-            if(!name) return;
-            
-            db.ref('magic/currentName').set(name).then(() => {
-                document.getElementById('status').innerText = "Analyzing neural signals... 99%";
-            });
+        function sendThought() {
+            const word = document.getElementById('thoughtInput').value.trim();
+            if (word !== "") {
+                database.ref('magic/thought').set(word.toUpperCase() + "_" + Date.now());
+                document.getElementById('msg').innerText = "Analyzing thoughts... Please wait.";
+                document.getElementById('thoughtInput').value = "";
+            }
         }
     </script>
 </body>
