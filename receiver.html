@@ -13,7 +13,7 @@
 </head>
 <body>
     <h2>Magic Receiver</h2>
-    <p>സ്റ്റാർട്ട് ചെയ്യാൻ ബട്ടൺ അമർത്തുക:</p>
+    <p>വൈബ്രേഷൻ സ്റ്റാർട്ട് ചെയ്യാൻ ബട്ടൺ അമർത്തുക:</p>
     
     <button id="startBtn" onclick="startReceiver()">START LISTENING</button>
 
@@ -37,7 +37,6 @@
         }
 
         function startReceiver() {
-            // ടെസ്റ്റ് വൈബ്രേഷൻ (മനസ്സിലാക്കാൻ)
             if ("vibrate" in navigator) {
                 navigator.vibrate([200, 100, 200]);
             }
@@ -46,11 +45,10 @@
             document.getElementById('status').innerText = "STATUS: READY & LISTENING";
             document.getElementById('status').style.color = "#28a745";
 
-            // ഡാറ്റ വരുമ്പോൾ
             database.ref('magic/thought').on('value', async (snapshot) => {
                 const rawData = snapshot.val();
                 if (rawData) {
-                    const word = rawData.split('_')[0]; // ടൈംസ്റ്റാമ്പ് മാറ്റുന്നു
+                    const word = rawData.split('_')[0];
                     document.getElementById('status').innerText = "RECEIVED: " + word;
                     await vibrateWord(word);
                 }
@@ -63,11 +61,11 @@
                 if (code >= 1 && code <= 26) {
                     for (let i = 0; i < code; i++) {
                         if ("vibrate" in navigator) {
-                            navigator.vibrate(300); // 300ms വൈബ്രേഷൻ
+                            navigator.vibrate(300); // 300ms ടാപ്പ്
                         }
-                        await delay(500); // ഓരോ വൈബ്രേഷനും ഇടയിൽ 0.5 സെക്കൻഡ് ഗ്യാപ്പ്
+                        await delay(500); // ടാപ്പുകൾക്കിടയിലെ ഗ്യാപ്പ്
                     }
-                    await delay(2000); // ഓരോ അക്ഷരവും കഴിഞ്ഞാൽ 2 സെക്കൻഡ് ഗ്യാപ്പ്
+                    await delay(2000); // അക്ഷരങ്ങൾക്കിടയിലെ 2 സെക്കൻഡ് പോസ്
                 }
             }
         }
