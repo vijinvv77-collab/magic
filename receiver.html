@@ -30,8 +30,10 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        let initialLoad = true;
+
         function enableVibration() {
-            // ബട്ടൺ അമർത്തുമ്പോൾ ചെറുതായി രണ്ട് തവണ വൈബ്രേറ്റ് ചെയ്യും
+            // ടെസ്റ്റ് വൈബ്രേഷൻ
             if ("vibrate" in navigator) {
                 navigator.vibrate([150, 100, 150]);
             }
@@ -40,12 +42,19 @@
             document.getElementById('status').innerText = "Ready & Listening...";
             document.getElementById('status').style.color = "#28a745";
 
-            // Firebase-ൽ നിന്ന് ഡാറ്റ വരുമ്പോൾ
+            // റീൽ ടൈം ലിസണർ
             database.ref('magic/thought').on('value', (snapshot) => {
                 const word = snapshot.val();
-                if (word) {
+                
+                // ആദ്യത്തെ തവണ ലിങ്ക് ഓപ്പൺ ചെയ്യുമ്പോൾ പాత വാക്ക് വൈബ്രേറ്റ് ചെയ്യാതിരിക്കാൻ
+                if (initialLoad) {
+                    initialLoad = false;
+                    return;
+                }
+
+                if (word && word.trim() !== "") {
                     document.getElementById('status').innerText = "Received: " + word;
-                    generateVibrationPattern(word.toUpperCase());
+                    generateVibrationPattern(word.trim().toUpperCase());
                 }
             });
         }
@@ -58,17 +67,15 @@
                 if (code >= 1 && code <= 26) {
                     for (let i = 0; i < code; i++) {
                         pattern.push(300); // 300ms വൈബ്രേഷൻ
-                        pattern.push(300); // വൈബ്രേഷനുകൾക്കിടയിലുള്ള 300ms ഗ്യാപ്പ്
+                        pattern.push(300); // 300ms ഗ്യാപ്പ്
                     }
-                    // ഒരു അക്ഷരം കഴിഞ്ഞാൽ അടുത്ത അക്ഷരത്തിനായി 2000ms (2 സെക്കൻഡ്) ഗ്യാപ്പ്
-                    pattern.push(2000); 
+                    pattern.push(2000); // അടുത്ത അക്ഷരത്തിനായി 2 സെക്കൻഡ് ഗ്യാപ്പ്
                 }
             }
 
             if ("vibrate" in navigator && pattern.length > 0) {
-                // മുൻപുള്ള വൈബ്രേഷൻ കാൻസൽ ചെയ്ത് പുതിയ പാറ്റേൺ പ്രവർത്തിപ്പിക്കുന്നു
-                navigator.vibrate(0);
-                navigator.vibrate(pattern);
+                navigator.vibrate(0); // നിലവിലുള്ളത് റീസെറ്റ് ചെയ്യുന്നു
+                navigator.vibrate(pattern); // പുതിയ വൈബ്രേഷൻ കൊടുക്കുന്നു
             }
         }
     </script>
