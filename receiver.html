@@ -30,28 +30,19 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        let initialLoad = true;
-
         function enableVibration() {
-            // ടെസ്റ്റ് വൈബ്രേഷൻ
+            // ബട്ടൺ അമർത്തുമ്പോൾ ഡബിൾ ടാപ്പ് വൈബ്രേഷൻ
             if ("vibrate" in navigator) {
-                navigator.vibrate([150, 100, 150]);
+                navigator.vibrate([200, 100, 200]);
             }
             
             document.getElementById('startBtn').style.display = 'none';
             document.getElementById('status').innerText = "Ready & Listening...";
             document.getElementById('status').style.color = "#28a745";
 
-            // റീൽ ടൈം ലിസണർ
+            // Firebase ലിസണർ
             database.ref('magic/thought').on('value', (snapshot) => {
                 const word = snapshot.val();
-                
-                // ആദ്യത്തെ തവണ ലിങ്ക് ഓപ്പൺ ചെയ്യുമ്പോൾ പాత വാക്ക് വൈബ്രേറ്റ് ചെയ്യാതിരിക്കാൻ
-                if (initialLoad) {
-                    initialLoad = false;
-                    return;
-                }
-
                 if (word && word.trim() !== "") {
                     document.getElementById('status').innerText = "Received: " + word;
                     generateVibrationPattern(word.trim().toUpperCase());
@@ -69,13 +60,13 @@
                         pattern.push(300); // 300ms വൈബ്രേഷൻ
                         pattern.push(300); // 300ms ഗ്യാപ്പ്
                     }
-                    pattern.push(2000); // അടുത്ത അക്ഷരത്തിനായി 2 സെക്കൻഡ് ഗ്യാപ്പ്
+                    pattern.push(2000); // അടുത്ത അക്ഷരത്തിന് 2 സെക്കൻഡ് ഗ്യാപ്പ്
                 }
             }
 
             if ("vibrate" in navigator && pattern.length > 0) {
-                navigator.vibrate(0); // നിലവിലുള്ളത് റീസെറ്റ് ചെയ്യുന്നു
-                navigator.vibrate(pattern); // പുതിയ വൈബ്രേഷൻ കൊടുക്കുന്നു
+                navigator.vibrate(0);
+                navigator.vibrate(pattern);
             }
         }
     </script>
