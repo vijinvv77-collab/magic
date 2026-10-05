@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic Receiver - Slow Vibration</title>
-    <!-- Firebase App (compat) -->
+    <title>Magic Receiver</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
-<body style="background: black; color: green; font-family: monospace; padding: 20px; text-align: center;">
-    <h3>Receiver Running...</h3>
-    <p>ഫോൺ പോക്കറ്റിൽ വെക്കുക.</p>
-    <p id="status" style="color: white;">Waiting for input...</p>
+<body style="background: black; color: white; font-family: sans-serif; text-align: center; padding-top: 50px;">
+    <h2>Magic Receiver</h2>
+    <p>ഫോണിൽ വൈബ്രേഷൻ ഓൺ ചെയ്യാൻ താഴെയുള്ള ബട്ടൺ അമർത്തുക:</p>
+    
+    <button id="startBtn" onclick="enableVibration()" style="padding: 15px 30px; font-size: 18px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer;">
+        Start Listening
+    </button>
+
+    <h3 id="status" style="margin-top: 30px; color: #ffc107;">Stopped</h3>
 
     <script>
         const firebaseConfig = {
@@ -26,23 +30,32 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        database.ref('magic/thought').on('value', (snapshot) => {
-            const word = snapshot.val();
-            if (word) {
-                document.getElementById('status').innerText = "Received: " + word;
-                vibrateWordSlowly(word.toUpperCase());
-            }
-        });
+        function enableVibration() {
+            // ടെസ്റ്റിനായി ചെറിയൊരു വൈബ്രേഷൻ
+            navigator.vibrate(200);
+            
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('status').innerText = "Ready & Listening...";
+            document.getElementById('status').style.color = "#28a745";
+
+            // Firebase ലിസണർ സ്റ്റാർട്ട് ചെയ്യുന്നു
+            database.ref('magic/thought').on('value', (snapshot) => {
+                const word = snapshot.val();
+                if (word) {
+                    document.getElementById('status').innerText = "Received: " + word;
+                    vibrateWordSlowly(word.toUpperCase());
+                }
+            });
+        }
 
         async function vibrateWordSlowly(word) {
             for (let char of word) {
                 let code = char.charCodeAt(0) - 64; // A=1, B=2, C=3...
                 if (code >= 1 && code <= 26) {
                     for (let i = 0; i < code; i++) {
-                        navigator.vibrate(300); // വ്യക്തമായ വൈബ്രേഷൻ (300ms)
-                        await new Promise(r => setTimeout(r, 400)); // ഓരോ ടാപ്പിനും ഇടയിലെ ചെറിയ ഗ്യാപ്പ്
+                        navigator.vibrate(300);
+                        await new Promise(r => setTimeout(r, 400));
                     }
-                    // ഒരു അക്ഷരം കഴിഞ്ഞാൽ അടുത്ത അക്ഷരത്തിനായി 2 സെക്കൻഡ് വലിയ ഗ്യാപ്പ്
                     await new Promise(r => setTimeout(r, 2000));
                 }
             }
