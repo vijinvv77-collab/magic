@@ -2,52 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Magic Receiver</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic Receiver - Slow Vibration</title>
+    <!-- Firebase App (compat) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
-<body style="background: black; color: green; font-family: monospace; padding: 20px;">
+<body style="background: black; color: green; font-family: monospace; padding: 20px; text-align: center;">
     <h3>Receiver Running...</h3>
     <p>ഫോൺ പോക്കറ്റിൽ വെക്കുക.</p>
+    <p id="status" style="color: white;">Waiting for input...</p>
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyCgY1QcZfvh4SoEdcVcSGl-_jdSCagH4sE",
+            apiKey: "AIzaSyCGy1QcZfvh4SoEdcVcSGl-_jdSCagH4sE",
             authDomain: "magicapp-7c8e1.firebaseapp.com",
             databaseURL: "https://magicapp-7c8e1-default-rtdb.firebaseio.com",
             projectId: "magicapp-7c8e1",
-            storageBucket: "magicapp-7c8e1.firebasestorage.app",
+            storageBucket: "magicapp-7c8e1.appspot.com",
             messagingSenderId: "26285258962",
             appId: "1:26285258962:web:c94661ee24dbf5cd35550b"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        const database = firebase.database();
 
-        db.ref('magic/currentName').on('value', (snapshot) => {
-            const name = snapshot.val();
-            if (name) {
-                playVibrationPattern(name);
+        database.ref('magic/thought').on('value', (snapshot) => {
+            const word = snapshot.val();
+            if (word) {
+                document.getElementById('status').innerText = "Received: " + word;
+                vibrateWordSlowly(word.toUpperCase());
             }
         });
 
-        function playVibrationPattern(word) {
-            let pattern = [];
-            
-            for (let i = 0; i < word.length; i++) {
-                let charCode = word.charCodeAt(i);
-                if (charCode >= 65 && charCode <= 90) {
-                    let count = charCode - 64;
-                    
-                    for (let j = 0; j < count; j++) {
-                        pattern.push(100); 
-                        pattern.push(150); 
+        async function vibrateWordSlowly(word) {
+            for (let char of word) {
+                let code = char.charCodeAt(0) - 64; // A=1, B=2, C=3...
+                if (code >= 1 && code <= 26) {
+                    for (let i = 0; i < code; i++) {
+                        navigator.vibrate(300); // വ്യക്തമായ വൈബ്രേഷൻ (300ms)
+                        await new Promise(r => setTimeout(r, 400)); // ഓരോ ടാപ്പിനും ഇടയിലെ ചെറിയ ഗ്യാപ്പ്
                     }
-                    pattern.push(1000);
+                    // ഒരു അക്ഷരം കഴിഞ്ഞാൽ അടുത്ത അക്ഷരത്തിനായി 2 സെക്കൻഡ് വലിയ ഗ്യാപ്പ്
+                    await new Promise(r => setTimeout(r, 2000));
                 }
-            }
-
-            if ("vibrate" in navigator) {
-                navigator.vibrate(pattern);
             }
         }
     </script>
