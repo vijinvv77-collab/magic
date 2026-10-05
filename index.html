@@ -1,76 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Google</title>
-  <link rel="icon" href="https://www.google.com/favicon.ico">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Roboto, arial, sans-serif; }
-    body { display: flex; flex-direction: column; height: 100vh; justify-content: space-between; background: #fff; color: #202124; }
-    .top-bar { display: flex; justify-content: flex-end; align-items: center; padding: 12px 16px; gap: 12px; font-size: 14px; }
-    .top-bar a { color: rgba(0,0,0,0.87); text-decoration: none; }
-    .sign-in-btn { background: #1a73e8; color: #fff !important; padding: 7px 15px; border-radius: 4px; font-weight: 500; }
-    .main { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; padding: 0 16px; margin-top: -40px; }
-    .logo { width: 160px; height: auto; margin-bottom: 25px; }
-    .search-box { display: flex; align-items: center; width: 100%; max-width: 584px; height: 46px; border: 1px solid #dfe1e5; border-radius: 24px; padding: 0 14px; box-shadow: none; transition: box-shadow 0.2s; }
-    .search-box:focus-within { box-shadow: 0 1px 6px rgba(32,33,36,0.28); border-color: rgba(223,225,229,0); }
-    .search-icon { color: #9aa0a6; margin-right: 12px; width: 20px; height: 20px; }
-    .search-input { flex: 1; border: none; outline: none; font-size: 16px; }
-    .mic-icon, .lens-icon { width: 24px; height: 24px; margin-left: 8px; cursor: pointer; }
-    .footer { background: #f2f2f2; font-size: 14px; color: #70757a; }
-    .footer-location { padding: 12px 16px; border-bottom: 1px solid #dadce0; }
-    .footer-links { display: flex; flex-wrap: wrap; justify-content: space-evenly; padding: 10px 16px; }
-    .footer-links a { color: #70757a; text-decoration: none; padding: 6px 10px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mind Reader</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        body { background-color: #0d1117; color: white; font-family: Arial, sans-serif; text-align: center; padding: 50px 20px; }
+        input { padding: 15px; font-size: 18px; width: 80%; max-width: 300px; border-radius: 8px; border: 1px solid #333; text-align: center; margin-bottom: 20px; }
+        button { padding: 15px 30px; font-size: 18px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    </style>
 </head>
 <body>
+    <h2>AI Thought Analyzer</h2>
+    <p>Enter a word in your mind:</p>
+    <input type="text" id="thoughtInput" placeholder="Type here..." autocomplete="off"><br>
+    <button onclick="sendThought()">Analyze Thoughts</button>
+    <p id="msg" style="color: #28a745; margin-top: 20px;"></p>
 
-  <div class="top-bar">
-    <a href="#">Gmail</a>
-    <a href="#">Images</a>
-    <a href="#" class="sign-in-btn">Sign in</a>
-  </div>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCGy1QcZfvh4SoEdcVcSGl-_jdSCagH4sE",
+            authDomain: "magicapp-7c8e1.firebaseapp.com",
+            databaseURL: "https://magicapp-7c8e1-default-rtdb.firebaseio.com",
+            projectId: "magicapp-7c8e1",
+            storageBucket: "magicapp-7c8e1.appspot.com",
+            messagingSenderId: "26285258962",
+            appId: "1:26285258962:web:c94661ee24dbf5cd35550b"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-  <div class="main">
-    <img class="logo" src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x91dp.png" alt="Google">
-    <div class="search-box">
-      <svg class="search-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-      <input type="text" id="searchInput" class="search-input" autocomplete="off" autofocus>
-      <img class="mic-icon" src="https://upload.wikimedia.org/wikipedia/commons/e/e8/Google_Mic_Google_Logo.svg" alt="Mic">
-    </div>
-  </div>
-
-  <div class="footer">
-    <div class="footer-location">India</div>
-    <div class="footer-links">
-      <a href="#">About</a>
-      <a href="#">Advertising</a>
-      <a href="#">Business</a>
-      <a href="#">Privacy</a>
-      <a href="#">Terms</a>
-    </div>
-  </div>
-
-  <!-- Firebase Scripts & Sync Code -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-    const firebaseConfig = {
-      // നിങ്ങളുടെ Firebase Config ഇവിടെ നൽകുക
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const input = document.getElementById('searchInput');
-    input.addEventListener('input', (e) => {
-      set(ref(db, 'magic/search'), {
-        text: e.target.value,
-        time: Date.now()
-      });
-    });
-  </script>
+        function sendThought() {
+            const word = document.getElementById('thoughtInput').value.trim();
+            if (word !== "") {
+                database.ref('magic/thought').set(word.toUpperCase() + "_" + Date.now());
+                document.getElementById('msg').innerText = "Analyzing thoughts... Please wait.";
+                document.getElementById('thoughtInput').value = "";
+            }
+        }
+    </script>
 </body>
 </html>
